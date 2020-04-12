@@ -1,0 +1,596 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>CV Free World!</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin="" />
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+        crossorigin=""></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        /* Style the header */
+        header {
+            background-color: #666;
+            padding: 30px;
+            text-align: center;
+            font-size: 35px;
+            color: white;
+        }
+
+        /* Create two columns/boxes that floats next to each other */
+        map {
+            float: left;
+            width: 80%;
+            height: 80%;
+            /* only for demonstration, should be removed */
+            background: #ccc;
+
+
+        }
+
+
+
+        annotation {
+            float: right;
+            padding: 20px;
+            width: 70%;
+            background-color: #f1f1f1;
+            height: 300px;
+            /* only for demonstration, should be removed */
+        }
+
+        /* Clear floats after the columns */
+        section:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        /* Style the footer */
+        footer {
+            background-color: #777;
+            padding: 10px;
+            text-align: center;
+            color: white;
+        }
+
+        /* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
+        @media (max-width: 600px) {
+
+            nav,
+            article {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+
+
+
+
+
+
+
+
+
+
+<body>
+
+    <header>
+        <h2>COVID-19 Free World!</h2>
+    </header>
+    <section>
+        <!-- <div id="mapid" style="width: 600px; height: 400px;"></div> -->
+        <map>
+            <div id="mapid" style="width: 80vw; height: 80vh;"></div>
+        </map>
+
+        <div>
+            <canvas style=' position: relative; ' id='foo'></canvas>
+        </div>
+
+    </section>
+
+    <!-- <div>
+        <canvas width="100" height="100" id="myChart.js"></canvas>
+    </div> -->
+
+
+    <script>
+
+        var userLang = 51.505; //London Lat
+        var userLong = -0.09;  //London Long
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                /*x.innerHTML = "Geolocation is not supported by this browser.";*/
+            }
+        }
+
+        function showPosition(position) {
+            userLang = position.coords.latitude;
+            userLong = position.coords.longitude;
+            /*x.innerHTML = "Latitude: " + position.coords.latitude +
+                "<br>Longitude: " + position.coords.longitude;*/
+        }
+
+        //getLocation();
+        /*var mymap = L.map('mapid').setView([51.505, -0.09], 13); */
+        var mymap = L.map('mapid', {
+            center: [0, 0],
+            zoom: 2
+        });
+
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+                '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+                'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1
+        }).addTo(mymap);
+
+        //let popPlot = "<div <canvas style=' position: relative; ' width="100" height="100" id='foo'></canvas></div>";
+
+        let popPlot = "<div <canvas  width='50' height='50' id='foo'></canvas></div>";
+
+
+
+
+        //L.marker([51.5, -0.09]).addTo(mymap)
+        //    .bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
+
+        /*L.circle([51.508, -0.11], 500, {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.5
+        }).addTo(mymap).bindPopup("I am a circle.");*/
+
+        /*L.polygon([
+            [51.509, -0.08],
+            [51.503, -0.06],
+            [51.51, -0.047]
+        ]).addTo(mymap).bindPopup("I am a polygon.");*/
+
+        function showChart(e) {
+
+            var cLocation = getCovidLocation(e.latlng.lat, e.latlng.lng);
+
+            if (cLocation != null) {
+
+                var layout = {
+                    title: 'COVID-19 Confirmed Cases: ' + cLocation.loc
+                };
+
+
+                Plotly.newPlot('foo', [{
+
+                    x: cLocation.xData,
+                    y: cLocation.yData,
+
+                    type: 'scatter'
+                    //mode: 'markers'
+                }], layout, {
+                    autosize: false,
+                    width: 50,
+                    height: 50,
+                    margin: {
+                        l: 1,
+                        r: 1,
+                        b: 1,
+                        t: 1,
+                        pad: 1
+                    }
+                });
+            }
+
+        }
+        var jsonData = [];
+        var file = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv";
+
+        fetchCVData(jsonData, file);
+        //console.log(jsonData[0]);
+        var jsconGlobalData = [];
+        var file = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
+
+        fetchCVData(jsconGlobalData, file);
+        //console.log(jsconGlobalData[0]);
+        //var xData = [];
+        //var yData = [];
+        var covidLocations = [];
+        var j = 0;
+        addMarkers(jsonData);
+        addMarkers(jsconGlobalData);
+
+
+        function addMarkers(jsonData) {
+            for (var i = 0; i < jsonData.length; i++) {
+
+                lat = jsonData[i].Lat;
+                long_ = jsonData[i].Long_;
+                if (long_ == null)
+                    long_ = jsonData[i].Long;
+                const today = new Date();
+                const yesterdayDate = new Date(today);
+
+                yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+                yesterday = yesterdayDate.getMonth() + 1 + "/" + yesterdayDate.getDate() + "/" + (yesterdayDate.getFullYear()).toString().substr(2, 4);
+
+                jsonObj = jsonData[i];
+                console.log(lat, long_);
+
+                if (lat != 0 && lat != null && long_ != 0 && long_ != null && jsonObj[yesterday] > 1000) {
+                    //console.log(jsonObj[yesterday]);
+                    //L.marker([jsonData[i].Lat, jsonData[i].Long_]).addTo(mymap);
+                    //console.log(lat, long_);
+                    let covidLocation = new Object();
+                    covidLocation.lat = lat;
+                    covidLocation.long_ = long_;
+                    covidLocation.xData = [];
+                    covidLocation.yData = [];
+                    covidLocation.yDataDelta = [];
+                    if (jsonObj["Admin2"] != null)
+                        covidLocation.loc = jsonObj["Admin2"] + ", " + jsonObj["Province_State"] + ", " + jsonObj["Country_Region"];
+                    else {
+                        if(jsonObj["Province/State"] != "")
+                            covidLocation.loc = jsonObj["Province/State"] + ", " + jsonObj["Country/Region"];
+                        else
+                            covidLocation.loc = jsonObj["Country/Region"];
+                    }
+                        
+                    getxyData(covidLocation.xData, covidLocation.yData, covidLocation.yDataDelta, jsonObj);
+                    covidLocations[j++] = covidLocation;
+                    //console.log(xData);
+                    //console.log(yData);
+                    marker = new L.Marker([lat, long_])
+                        //.bindPopup('<div id="foo"></div>')
+                        .bindPopup(popPlot, { maxWidth: "auto", maxHeight: "auto", closeOnClick: true })
+                        .on('click', showChart).addTo(mymap);
+
+
+
+                }
+
+            }
+
+
+        }
+
+
+
+        function getxyData(xData, yData, yDelta, jsonObj) {
+
+            const lastDate = "1\/22\/20";
+            //console.log(yesterday.toString("MM/DD/YY"));
+            let keys = Object.keys(jsonObj);
+            let totalKeys = keys.length;
+            var dataIndex = 0;
+            for (var i = 0; i < totalKeys; i++) {
+                if (keys[i].includes("/20")) {
+
+                    //console.log(keys[i]);
+                    var dateKey = keys[i];
+                    xData[dataIndex] = keys[i];
+                    yData[dataIndex] = jsonObj[dateKey];
+                    if (dataIndex > 0)
+                        yDelta[dataIndex] = yData[dataIndex] - yData[dataIndex - 1];
+                    dataIndex++;
+                    //console.log(jsonObj[dateKey]);
+
+
+
+                }
+
+            }
+
+
+
+
+        }
+
+        function getCovidLocation(lat, long_) {
+            for (var i = 0; i < covidLocations.length; i++) {
+                if (covidLocations[i].lat == lat &&
+                    covidLocations[i].long_ == long_)
+                    return covidLocations[i];
+            }
+            return null;
+
+        }
+
+        function fetchCVData(jsonObj, file) {
+
+
+            var rawFile = new XMLHttpRequest();
+            rawFile.open("GET", file, false);
+            rawFile.onreadystatechange = function () {
+                if (rawFile.readyState === 4) {
+                    if (rawFile.status === 200 || rawFile.status === 0) {
+                        var arr = rawFile.responseText;
+                        var cols = arr.split('\n');
+                        var headers = cols[0].split(',');
+                        //console.log(headers);
+                        for (var i = 1; i < cols.length; i++) {
+                            var newCol = removeComaFromData(cols[i]);
+                            var rows = newCol.split(',');
+                            //console.log(rows);
+                            var obj = {};
+                            for (var j = 0; j < rows.length; j++) {
+                                obj[headers[j]] = rows[j];
+                            }
+
+                            jsonObj.push(obj);
+                        }
+                        JSON.stringify(jsonObj);
+
+                    }
+                }
+            }
+            rawFile.send(null);
+
+
+
+        }
+
+        function fetchGlobalCVData(jsonObj) {
+
+            var file = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
+
+            var rawFile = new XMLHttpRequest();
+            rawFile.open("GET", file, false);
+            rawFile.onreadystatechange = function () {
+                if (rawFile.readyState === 4) {
+                    if (rawFile.status === 200 || rawFile.status === 0) {
+                        var arr = rawFile.responseText;
+                        var cols = arr.split('\n');
+                        var headers = cols[0].split(',');
+                        console.log(headers);
+                        for (var i = 1; i < cols.length; i++) {
+                            var newCol = removeComaFromData(cols[i]);
+                            var rows = newCol.split(',');
+
+                            //console.log(rows);
+                            var obj = {};
+                            for (var j = 0; j < rows.length; j++) {
+                                obj[headers[j]] = rows[j];
+                            }
+
+                            jsonObj.push(obj);
+                        }
+                        JSON.stringify(jsonObj);
+
+                    }
+                }
+            }
+            rawFile.send(null);
+        }
+        function fetchUSCVData(jsonObj) {
+            var file = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv";
+            var rawFile = new XMLHttpRequest();
+            rawFile.open("GET", file, false);
+            rawFile.onreadystatechange = function () {
+                if (rawFile.readyState === 4) {
+                    if (rawFile.status === 200 || rawFile.status === 0) {
+                        var arr = rawFile.responseText;
+                        var cols = arr.split('\n');
+                        var headers = cols[0].split(',');
+                        //console.log(headers);
+                        for (var i = 1; i < cols.length; i++) {
+                            var newCol = removeComaFromData(cols[i]);
+                            var rows = newCol.split(',');
+                            //console.log(rows);
+                            var obj = {};
+                            for (var j = 0; j < rows.length; j++) {
+                                obj[headers[j]] = rows[j];
+                            }
+
+                            jsonObj.push(obj);
+                        }
+                        JSON.stringify(jsonObj);
+
+                    }
+                }
+            }
+            rawFile.send(null);
+
+
+
+        }
+
+        function removeComaFromData(s) {
+            //console.log(s);
+            var firstDoubleQuotes = s.indexOf('"');
+            var secondDoubleQuotes = s.indexOf('"', firstDoubleQuotes + 1);
+
+            var coma = s.indexOf(',', firstDoubleQuotes + 1);
+            while (coma != -1 && coma < secondDoubleQuotes) {
+                //console.log(coma);
+                s = setCharAt(s, coma, '-');
+                coma = s.indexOf(',', coma + 1);
+            }
+
+            //s[firstComa] = '-';
+
+            //console.log(s);
+            return s;
+        }
+
+        function setCharAt(str, index, chr) {
+            if (index > str.length - 1) return str;
+            return str.substr(0, index) + chr + str.substr(index + 1);
+        }
+
+        //let title="<div style='margin-left:10px;'><canvas style='clear:both;\
+        //position: relative;' id='myChart'></canvas></div>";
+
+
+
+
+
+       // var popup = L.popup();
+
+        //function onMapClick(e) {
+
+
+
+           // popup
+           //     .setLatLng(e.latlng)
+            //    .setContent("You clicked the map at " + e.latlng.toString())
+                //.setContent(myChart)
+             //   .openOn(mymap);
+
+            //map.on('popup', function (e) {
+            //Run the chart code here like this
+            //    var chart = new Charts.LineChart('chart1');
+            //    chart.add_line({
+            //        data: [[1, 828906, { tooltip: "my special point" }], [2, 566933], [3, 584150], [4,
+            //            1072143], [5, 1622455], [6, 2466746], [7, 2427789]]
+            //    });
+
+            //    chart.draw();
+            //});
+
+
+
+       // }
+
+       // mymap.on('click', onMapClick);
+
+
+
+
+        /*
+
+        let title = "<div style='margin-left:10px;'><canvas style='clear:both; position: relative; ' id='myChart'></canvas></div>";
+
+        let marker = L.marker([0, 0]).addTo(mymap);
+
+        //marker.unbindPopup().bindPopup(title, {
+        //    autoPan: true,
+        //    maxWidth: "auto"
+        //}).openPopup();
+
+        //marker.addTo(this.iconLayer);
+
+
+        function onMarkerClick() {
+            let ctx = document.getElementById("myChart");
+            let myChart = new Chart('ctx', {
+                type: 'line',
+                data: {
+                    labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+                    datasets: [{
+                        label: 'Grafik',
+                        data: [2, 29, 5, 5, 2, 3, 10],
+                        backgroundColor: "rgba(255,153,0,0.4)"
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        }
+
+
+        marker.on("click", onMarkerClick);
+
+        */
+
+        /*marker = new L.Marker([lat, long_])
+                    //.bindPopup('<div id="foo"></div>')
+                    .bindPopup(popPlot)
+                    .on('popupopen', function (e) {
+                        Plotly.newPlot('foo', [{
+                            //x: [0, 1, 5, 3, 4, 5, 6, 7, 8],
+                            x: xData,
+                            y: yData,
+                            //y: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                            type: 'scatter'
+                        }], {
+                            autosize: true,
+                            width: 200,
+                            height: 200,
+                            margin: {
+                                l: 10,
+                                r: 10,
+                                b: 10,
+                                t: 10,
+                                pad: 10
+                            }
+                        });
+                    }).addTo(mymap);
+                marker.unbindPopup().bindPopup(popPlot, {
+                    autoPan: true,
+                    maxWidth: "auto"
+                }).openPopup();*/
+
+
+        /*
+        const ctx = document.getElementById("myChart.js");
+console.log(ctx);
+console.log(ctx.getContext('2d'));
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        datasets: [{
+            label: '# of Votes',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+
+
+        */
+
+    </script>
+</body>
+
+</html>
