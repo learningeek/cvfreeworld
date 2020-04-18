@@ -26,17 +26,17 @@
 
         /* Style the header */
         header {
-            background-color: #666;
-            padding: 30px;
+            background-color: #0a79e0;
+            padding: 1px;
             text-align: center;
-            font-size: 35px;
+            font-size: 25px;
             color: white;
         }
 
         /* Create two columns/boxes that floats next to each other */
         map {
             float: left;
-            width: 80%;
+            width: 100%;
             height: 100%;
             /* only for demonstration, should be removed */
             background: #ccc;
@@ -46,14 +46,14 @@
 
 
 
-        annotation {
+        /* annotation {
             float: right;
             padding: 20px;
             width: 70%;
             background-color: #f1f1f1;
             height: 300px;
-            /* only for demonstration, should be removed */
-        }
+           
+        }*/
 
         /* Clear floats after the columns 
         section:after {
@@ -99,7 +99,7 @@
     <section>
         <!-- <div id="mapid" style="width: 600px; height: 400px;"></div> -->
         <map>
-            <div id="mapid" style="width: 80vw; height: 100vh;"></div>
+            <div id="mapid" style="width: 100vw; height: 100vh;"></div>
         </map>
 
         <div>
@@ -210,6 +210,7 @@
         function showChart(e) {
 
             var cLocation = getCovidLocation(e.latlng.lat, e.latlng.lng);
+            //console.log(this.getPane());
 
             if (cLocation != null) {
 
@@ -227,8 +228,8 @@
                     //mode: 'markers'
                 }], layout, {
                     autosize: false,
-                    width: 50,
-                    height: 50,
+                    width: 25,
+                    height: 25,
                     margin: {
                         l: 1,
                         r: 1,
@@ -306,26 +307,27 @@
                     //dayBeforeYesterdayCases = jsonObj[dayBeforeYesterday];
                     //console.log(covidLocation.xData, covidLocation.yData, covidLocation.yDataDelta);
                     const deltaCases = covidLocation.yDataDelta[covidLocation.yDataDelta.length - 1] - covidLocation.yDataDelta[covidLocation.yDataDelta.length - 2];
+                    const popUpOptions = { maxWidth: "auto", maxHeight: "auto", closeOnClick: true };
                     if (deltaCases < 0) {
                         //console.log(yesterdayCases, dayBeforeYesterdayCases, yesterdayCases - dayBeforeYesterdayCases);
                         //console.log(deltaCases,covidLocation.yDataDelta[covidLocation.yDataDelta.length-1], covidLocation.yDataDelta[covidLocation.yDataDelta.length-2]);
                         marker = new L.Marker([lat, long_], { icon: yellowIcon })
                             //.bindPopup('<div id="foo"></div>')
-                            .bindPopup(popPlot, { maxWidth: "auto", maxHeight: "100", closeOnClick: true })
+                            .bindPopup(popPlot, popUpOptions)
                             .on('click', showChart).addTo(mymap);
                     }
                     else if (deltaCases > 0) {
 
                         marker = new L.Marker([lat, long_], { icon: redIcon })
                             //.bindPopup('<div id="foo"></div>')
-                            .bindPopup(popPlot, { maxWidth: "auto", maxHeight: "100", closeOnClick: true })
+                            .bindPopup(popPlot, popUpOptions)
                             .on('click', showChart).addTo(mymap);
 
                     }
                     else
                         marker = new L.Marker([lat, long_])
                             //.bindPopup('<div id="foo"></div>')
-                            .bindPopup(popPlot, { maxWidth: "auto", maxHeight: "auto", closeOnClick: true })
+                            .bindPopup(popPlot, popUpOptions)
                             .on('click', showChart).addTo(mymap);
 
 
