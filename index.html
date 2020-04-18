@@ -138,7 +138,7 @@
         /*var mymap = L.map('mapid').setView([51.505, -0.09], 13); */
         var mymap = L.map('mapid', {
             center: [0, 0],
-            zoom: 2
+            zoom: 2, dragging: true
         });
 
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
@@ -173,6 +173,33 @@
             [51.51, -0.047]
         ]).addTo(mymap).bindPopup("I am a polygon.");*/
 
+        var greenIcon = new L.Icon({
+            iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        var redIcon = new L.Icon({
+            iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        var yellowIcon = new L.Icon({
+            iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
         function showChart(e) {
 
             var cLocation = getCovidLocation(e.latlng.lat, e.latlng.lng);
@@ -203,6 +230,7 @@
                         pad: 1
                     }
                 });
+                mymap.panTo(new L.LatLng(e.latlng.lat, e.latlng.lng));
             }
 
         }
@@ -237,8 +265,12 @@
                 yesterdayDate.setDate(yesterdayDate.getDate() - 1);
                 yesterday = yesterdayDate.getMonth() + 1 + "/" + yesterdayDate.getDate() + "/" + (yesterdayDate.getFullYear()).toString().substr(2, 4);
 
+                const dayBeforeYesterdayDate = new Date(yesterdayDate);
+                dayBeforeYesterdayDate.setDate(yesterdayDate.getDate() - 1);
+                dayBeforeYesterday = dayBeforeYesterdayDate.getMonth() + 1 + "/" + dayBeforeYesterdayDate.getDate() + "/" + (dayBeforeYesterdayDate.getFullYear()).toString().substr(2, 4);
+
                 jsonObj = jsonData[i];
-                console.log(lat, long_);
+                //console.log(lat, long_);
 
                 if (lat != 0 && lat != null && long_ != 0 && long_ != null && jsonObj[yesterday] > 1000) {
                     //console.log(jsonObj[yesterday]);
@@ -253,20 +285,41 @@
                     if (jsonObj["Admin2"] != null)
                         covidLocation.loc = jsonObj["Admin2"] + ", " + jsonObj["Province_State"] + ", " + jsonObj["Country_Region"];
                     else {
-                        if(jsonObj["Province/State"] != "")
+                        if (jsonObj["Province/State"] != "")
                             covidLocation.loc = jsonObj["Province/State"] + ", " + jsonObj["Country/Region"];
                         else
                             covidLocation.loc = jsonObj["Country/Region"];
                     }
-                        
+
                     getxyData(covidLocation.xData, covidLocation.yData, covidLocation.yDataDelta, jsonObj);
                     covidLocations[j++] = covidLocation;
                     //console.log(xData);
                     //console.log(yData);
-                    marker = new L.Marker([lat, long_])
-                        //.bindPopup('<div id="foo"></div>')
-                        .bindPopup(popPlot, { maxWidth: "auto", maxHeight: "auto", closeOnClick: true })
-                        .on('click', showChart).addTo(mymap);
+                    //yesterdayCases = jsonObj[yesterday];
+                    //dayBeforeYesterdayCases = jsonObj[dayBeforeYesterday];
+                    //console.log(covidLocation.xData, covidLocation.yData, covidLocation.yDataDelta);
+                    const deltaCases = covidLocation.yDataDelta[covidLocation.yDataDelta.length-1] - covidLocation.yDataDelta[covidLocation.yDataDelta.length-2];
+                    if (deltaCases < 0) {
+                        //console.log(yesterdayCases, dayBeforeYesterdayCases, yesterdayCases - dayBeforeYesterdayCases);
+                        //console.log(deltaCases,covidLocation.yDataDelta[covidLocation.yDataDelta.length-1], covidLocation.yDataDelta[covidLocation.yDataDelta.length-2]);
+                        marker = new L.Marker([lat, long_], { icon: yellowIcon })
+                            //.bindPopup('<div id="foo"></div>')
+                            .bindPopup(popPlot, { maxWidth: "auto", maxHeight: "100", closeOnClick: true })
+                            .on('click', showChart).addTo(mymap);
+                    }
+                    else if (deltaCases > 0 ) {
+
+                        marker = new L.Marker([lat, long_], { icon: redIcon })
+                            //.bindPopup('<div id="foo"></div>')
+                            .bindPopup(popPlot, { maxWidth: "auto", maxHeight: "100", closeOnClick: true })
+                            .on('click', showChart).addTo(mymap);
+
+                    }
+                    else
+                        marker = new L.Marker([lat, long_])
+                            //.bindPopup('<div id="foo"></div>')
+                            .bindPopup(popPlot, { maxWidth: "auto", maxHeight: "auto", closeOnClick: true })
+                            .on('click', showChart).addTo(mymap);
 
 
 
@@ -353,70 +406,6 @@
 
         }
 
-        function fetchGlobalCVData(jsonObj) {
-
-            var file = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
-
-            var rawFile = new XMLHttpRequest();
-            rawFile.open("GET", file, false);
-            rawFile.onreadystatechange = function () {
-                if (rawFile.readyState === 4) {
-                    if (rawFile.status === 200 || rawFile.status === 0) {
-                        var arr = rawFile.responseText;
-                        var cols = arr.split('\n');
-                        var headers = cols[0].split(',');
-                        console.log(headers);
-                        for (var i = 1; i < cols.length; i++) {
-                            var newCol = removeComaFromData(cols[i]);
-                            var rows = newCol.split(',');
-
-                            //console.log(rows);
-                            var obj = {};
-                            for (var j = 0; j < rows.length; j++) {
-                                obj[headers[j]] = rows[j];
-                            }
-
-                            jsonObj.push(obj);
-                        }
-                        JSON.stringify(jsonObj);
-
-                    }
-                }
-            }
-            rawFile.send(null);
-        }
-        function fetchUSCVData(jsonObj) {
-            var file = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv";
-            var rawFile = new XMLHttpRequest();
-            rawFile.open("GET", file, false);
-            rawFile.onreadystatechange = function () {
-                if (rawFile.readyState === 4) {
-                    if (rawFile.status === 200 || rawFile.status === 0) {
-                        var arr = rawFile.responseText;
-                        var cols = arr.split('\n');
-                        var headers = cols[0].split(',');
-                        //console.log(headers);
-                        for (var i = 1; i < cols.length; i++) {
-                            var newCol = removeComaFromData(cols[i]);
-                            var rows = newCol.split(',');
-                            //console.log(rows);
-                            var obj = {};
-                            for (var j = 0; j < rows.length; j++) {
-                                obj[headers[j]] = rows[j];
-                            }
-
-                            jsonObj.push(obj);
-                        }
-                        JSON.stringify(jsonObj);
-
-                    }
-                }
-            }
-            rawFile.send(null);
-
-
-
-        }
 
         function removeComaFromData(s) {
             //console.log(s);
