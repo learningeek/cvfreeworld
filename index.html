@@ -14,7 +14,6 @@
         integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
         crossorigin=""></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         * {
@@ -38,7 +37,7 @@
         map {
             float: left;
             width: 80%;
-            height: 80%;
+            height: 100%;
             /* only for demonstration, should be removed */
             background: #ccc;
 
@@ -56,20 +55,20 @@
             /* only for demonstration, should be removed */
         }
 
-        /* Clear floats after the columns */
+        /* Clear floats after the columns 
         section:after {
             content: "";
             display: table;
             clear: both;
-        }
+        }*/
 
-        /* Style the footer */
+        /* Style the footer 
         footer {
             background-color: #777;
             padding: 10px;
             text-align: center;
             color: white;
-        }
+        }*/
 
         /* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
         @media (max-width: 600px) {
@@ -100,7 +99,7 @@
     <section>
         <!-- <div id="mapid" style="width: 600px; height: 400px;"></div> -->
         <map>
-            <div id="mapid" style="width: 80vw; height: 80vh;"></div>
+            <div id="mapid" style="width: 80vw; height: 100vh;"></div>
         </map>
 
         <div>
@@ -138,9 +137,17 @@
         /*var mymap = L.map('mapid').setView([51.505, -0.09], 13); */
         var mymap = L.map('mapid', {
             center: [0, 0],
-            zoom: 2, dragging: true
+            zoom: 2, dragging: true,
         });
 
+        var southWest = L.latLng(-89.98155760646617, -180),
+            northEast = L.latLng(89.99346179538875, 180);
+        var bounds = L.latLngBounds(southWest, northEast);
+
+        mymap.setMaxBounds(bounds);
+        mymap.on('drag', function () {
+            mymap.panInsideBounds(bounds, { animate: false });
+        });
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
             maxZoom: 18,
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
@@ -298,7 +305,7 @@
                     //yesterdayCases = jsonObj[yesterday];
                     //dayBeforeYesterdayCases = jsonObj[dayBeforeYesterday];
                     //console.log(covidLocation.xData, covidLocation.yData, covidLocation.yDataDelta);
-                    const deltaCases = covidLocation.yDataDelta[covidLocation.yDataDelta.length-1] - covidLocation.yDataDelta[covidLocation.yDataDelta.length-2];
+                    const deltaCases = covidLocation.yDataDelta[covidLocation.yDataDelta.length - 1] - covidLocation.yDataDelta[covidLocation.yDataDelta.length - 2];
                     if (deltaCases < 0) {
                         //console.log(yesterdayCases, dayBeforeYesterdayCases, yesterdayCases - dayBeforeYesterdayCases);
                         //console.log(deltaCases,covidLocation.yDataDelta[covidLocation.yDataDelta.length-1], covidLocation.yDataDelta[covidLocation.yDataDelta.length-2]);
@@ -307,7 +314,7 @@
                             .bindPopup(popPlot, { maxWidth: "auto", maxHeight: "100", closeOnClick: true })
                             .on('click', showChart).addTo(mymap);
                     }
-                    else if (deltaCases > 0 ) {
+                    else if (deltaCases > 0) {
 
                         marker = new L.Marker([lat, long_], { icon: redIcon })
                             //.bindPopup('<div id="foo"></div>')
