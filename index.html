@@ -102,7 +102,7 @@
             <div id="mapid" style="width: 100vw; height: 100vh;"></div>
         </map>
 
-        
+
 
     </section>
 
@@ -162,7 +162,8 @@
 
         //let popPlot = "<div <canvas  width='50' height='50' id='foo'></canvas></div>";
 
-        let popPlot = "<div  id='foo'></div>";
+        //let popPlot = "<div  style='height: 300px' id='foo'></div>";
+        let popPlot = "<div  style='width: 30vw; height: 30vh' id='foo'></div>"; 
 
         var greenIcon = new L.Icon({
             iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
@@ -201,12 +202,20 @@
                 mymap.panTo(new L.LatLng(e.latlng.lat, e.latlng.lng));
                 var currentPopUp = e.target.getPopup();
                 var currentCenter = mymap.getCenter();
-                currentCenter.lat = currentCenter.lat-25;
-                currentCenter.lng = currentCenter.lng-25;
-                if(currentPopUp != null)
+                currentCenter.lat = currentCenter.lat - 25;
+                currentCenter.lng = currentCenter.lng - 25;
+                if (currentPopUp != null)
                     currentPopUp.setLatLng(currentCenter);
                 var layout = {
-                    title: 'COVID-19 Confirmed Cases: ' + cLocation.loc
+                    title: 'COVID-19 Confirmed Cases: ' + cLocation.loc,
+                    font: { size: 10 },
+                    margin: {
+                        l: 30,
+                        r: 30,
+                        b: 50,
+                        t: 80
+                    }
+                
                 };
 
 
@@ -215,24 +224,16 @@
                     x: cLocation.xData,
                     y: cLocation.yData,
 
-                    type: 'scatter'
+                    type: 'line'
                     //mode: 'markers'
                 }], layout, {
                     responsive: true,
-                    /*autosize: true,
-                    automargin: true
-                   /* width: 25,
-                    height: 25
-                    margin: {
-                        l: 1,
-                        r: 1,
-                        b: 1,
-                        t: 1,
-                        pad: 1
-                    }*/
+                    autosize: true,
+                    
+                    
                 });
-                
-                
+
+
             }
 
         }
@@ -245,7 +246,7 @@
         var file = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
 
         fetchCVData(jsconGlobalData, file);
-      
+
         var covidLocations = [];
         var totalLocations = 0;
         addMarkers(jsonData);
@@ -300,7 +301,7 @@
                     //console.log(covidLocation.xData, covidLocation.yData, covidLocation.yDataDelta);
                     const deltaCases = covidLocation.yDataDelta[covidLocation.yDataDelta.length - 1] - covidLocation.yDataDelta[covidLocation.yDataDelta.length - 2];
                     const popUpOptions = { maxWidth: "auto", maxHeight: "auto", closeOnClick: true };
-                    
+
                     if (deltaCases < 0) {
                         //console.log(yesterdayCases, dayBeforeYesterdayCases, yesterdayCases - dayBeforeYesterdayCases);
                         //console.log(deltaCases,covidLocation.yDataDelta[covidLocation.yDataDelta.length-1], covidLocation.yDataDelta[covidLocation.yDataDelta.length-2]);
@@ -342,8 +343,9 @@
                 if (keys[i].includes("/20")) {
 
                     //console.log(keys[i]);
+                    var dateKeyLength = keys[i].length;
                     var dateKey = keys[i];
-                    xData[dataIndex] = keys[i];
+                    xData[dataIndex] = keys[i].substr(0,dateKeyLength-3);
                     yData[dataIndex] = jsonObj[dateKey];
                     if (dataIndex > 0)
                         yDelta[dataIndex] = yData[dataIndex] - yData[dataIndex - 1];
@@ -405,7 +407,7 @@
 
         }
 
-        function trimAndReplace(s){
+        function trimAndReplace(s) {
             trimmedString = s.replace(/[\n\r]/g, '');
             return trimmedString;
         }
