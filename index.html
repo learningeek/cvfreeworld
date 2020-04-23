@@ -163,7 +163,7 @@
         //let popPlot = "<div <canvas  width='50' height='50' id='foo'></canvas></div>";
 
         //let popPlot = "<div  style='height: 300px' id='foo'></div>";
-        let popPlot = "<div  style='width: 30vw; min-width:100px; height: 30vh; min-height:80' id='foo'></div>";
+        let popPlot = "<div  style='width: 30vw; min-width:120px; height: 30vh; min-height:100' id='foo'></div>";
 
         var greenIcon = new L.Icon({
             iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
@@ -192,9 +192,7 @@
             shadowSize: [41, 41]
         });
 
-        function getResolution() {
-            alert("Your screen resolution is: " + window.screen.width * window.devicePixelRatio + "x" + window.screen.height * window.devicePixelRatio);
-        }
+        
         function showChart(e) {
 
             var cLocation = getCovidLocation(e.latlng.lat, e.latlng.lng);
