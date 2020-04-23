@@ -163,7 +163,7 @@
         //let popPlot = "<div <canvas  width='50' height='50' id='foo'></canvas></div>";
 
         //let popPlot = "<div  style='height: 300px' id='foo'></div>";
-        let popPlot = "<div  style='width: 30vw; height: 30vh' id='foo'></div>"; 
+        let popPlot = "<div  style='width: 30vw; min-width:100px; height: 30vh; min-height:80' id='foo'></div>";
 
         var greenIcon = new L.Icon({
             iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
@@ -192,6 +192,9 @@
             shadowSize: [41, 41]
         });
 
+        function getResolution() {
+            alert("Your screen resolution is: " + window.screen.width * window.devicePixelRatio + "x" + window.screen.height * window.devicePixelRatio);
+        }
         function showChart(e) {
 
             var cLocation = getCovidLocation(e.latlng.lat, e.latlng.lng);
@@ -202,20 +205,20 @@
                 mymap.panTo(new L.LatLng(e.latlng.lat, e.latlng.lng));
                 var currentPopUp = e.target.getPopup();
                 var currentCenter = mymap.getCenter();
-                currentCenter.lat = currentCenter.lat - 25;
-                currentCenter.lng = currentCenter.lng - 25;
+                //currentCenter.lat = currentCenter.lat - 25;
+                //currentCenter.lng = currentCenter.lng - 25;
                 if (currentPopUp != null)
                     currentPopUp.setLatLng(currentCenter);
                 var layout = {
-                    title: 'COVID-19 Confirmed Cases: ' + cLocation.loc,
+                    title: 'Confirmed cases: '+cLocation.loc,
                     font: { size: 10 },
                     margin: {
-                        l: 30,
-                        r: 30,
-                        b: 50,
-                        t: 80
+                        l: 25,
+                        r: 10,
+                        b: 40,
+                        t: 30
                     }
-                
+                    
                 };
 
 
@@ -229,9 +232,10 @@
                 }], layout, {
                     responsive: true,
                     autosize: true,
-                    displayModeBar: false
-                    
-                    
+                    displayModeBar: false,
+                    automargin: true
+
+
                 });
 
 
@@ -346,7 +350,7 @@
                     //console.log(keys[i]);
                     var dateKeyLength = keys[i].length;
                     var dateKey = keys[i];
-                    xData[dataIndex] = keys[i].substr(0,dateKeyLength-3);
+                    xData[dataIndex] = keys[i].substr(0, dateKeyLength - 3);
                     yData[dataIndex] = jsonObj[dateKey];
                     if (dataIndex > 0)
                         yDelta[dataIndex] = yData[dataIndex] - yData[dataIndex - 1];
