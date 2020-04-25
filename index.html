@@ -194,7 +194,7 @@
         };
 
         info.update = function (props) {
-            this._div.innerHTML = '<h4>COVID-19 Confirmed Cases</h4>' + (props ?
+            this._div.innerHTML = '<h4>COVID-19 1000+ Confirmed Cases</h4>' + (props ?
                 '<b>' + props.cases + '</b><br />' + '<b>' + props.date + '</b'
                 : 'Tap on a marker');
         };
@@ -262,11 +262,17 @@
         });
 
         function mouseHover(e) {
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+            
             var cLocation = getCovidLocation(e.latlng.lat, e.latlng.lng);
             var dataSize = cLocation.xData.length;
             var locationDetail = new Object();
+            var yesterdayDate = new Date(cLocation.xData[dataSize - 1]);
+
             locationDetail.cases = cLocation.yData[dataSize - 1] + " cases in " + cLocation.loc;
-            locationDetail.date = "on " + cLocation.xData[dataSize - 1];
+            locationDetail.date = "on " + monthNames[yesterdayDate.getMonth()]+ " "+ yesterdayDate.getDate();
             info.update(locationDetail);
 
         }
