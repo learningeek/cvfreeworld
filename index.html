@@ -24,16 +24,7 @@
             font-family: Arial, Helvetica, sans-serif;
         }
 
-        /* Style the header 
-        header {
-            background-color: #0a79e0;
-            padding: 1px;
-            text-align: center;
-            font-size: 25px;
-            color: white;
-        }*/
-
-        /* Create two columns/boxes that floats next to each other */
+        
         map {
             float: left;
             width: 100%;
@@ -46,29 +37,7 @@
 
 
 
-        /* annotation {
-            float: right;
-            padding: 20px;
-            width: 70%;
-            background-color: #f1f1f1;
-            height: 300px;
-           
-        }*/
-
-        /* Clear floats after the columns 
-        section:after {
-            content: "";
-            display: table;
-            clear: both;
-        }*/
-
-        /* Style the footer 
-        footer {
-            background-color: #777;
-            padding: 10px;
-            text-align: center;
-            color: white;
-        }*/
+        
 
         /* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
         @media (max-width: 600px) {
@@ -132,9 +101,7 @@
 
     </section>
 
-    <!-- <div>
-        <canvas width="100" height="100" id="myChart.js"></canvas>
-    </div> -->
+    
 
 
     <script>
@@ -153,12 +120,10 @@
         function showPosition(position) {
             userLang = position.coords.latitude;
             userLong = position.coords.longitude;
-            /*x.innerHTML = "Latitude: " + position.coords.latitude +
-                "<br>Longitude: " + position.coords.longitude;*/
+            
         }
 
-        //getLocation();
-        /*var mymap = L.map('mapid').setView([51.505, -0.09], 13); */
+        
         var mymap = L.map('mapid', {
             center: [0, 0],
             zoom: 2, dragging: true,
@@ -227,11 +192,7 @@
         };
         legend.addTo(mymap);
 
-        //let popPlot = "<div <canvas style=' position: relative; ' width="100" height="100" id='foo'></canvas></div>";
-
-        //let popPlot = "<div <canvas  width='50' height='50' id='foo'></canvas></div>";
-
-        //let popPlot = "<div  style='height: 300px' id='foo'></div>";
+        
         let popPlot = "<div  style='width: 30vw; min-width:120px; height: 30vh; min-height:100' id='foo'></div>";
 
         var greenIcon = new L.Icon({
@@ -345,12 +306,12 @@
 
 
         function addMarkers(jsonData) {
-            for (var i = 0; i < jsonData.length; i++) {
+            for (var dataPoint = 0; dataPoint < jsonData.length; dataPoint++) {
 
-                lat = jsonData[i].Lat;
-                long_ = jsonData[i].Long_;
+                lat = jsonData[dataPoint].Lat;
+                long_ = jsonData[dataPoint].Long_;
                 if (long_ == null)
-                    long_ = jsonData[i].Long;
+                    long_ = jsonData[dataPoint].Long;
                 const today = new Date();
                 const yesterdayDate = new Date(today);
 
@@ -361,7 +322,7 @@
                 dayBeforeYesterdayDate.setDate(yesterdayDate.getDate() - 1);
                 dayBeforeYesterday = dayBeforeYesterdayDate.getMonth() + 1 + "/" + dayBeforeYesterdayDate.getDate() + "/" + (dayBeforeYesterdayDate.getFullYear()).toString().substr(2, 4);
 
-                jsonObj = jsonData[i];
+                jsonObj = jsonData[dataPoint];
                 //console.log(lat, long_);
                 //console.log(lat, long_, jsonObj[yesterday]);
                 if (lat != 0 && lat != null && long_ != 0 && long_ != null && jsonObj[yesterday] > 1000) {
@@ -436,13 +397,13 @@
             let keys = Object.keys(jsonObj);
             let totalKeys = keys.length;
             var dataIndex = 0;
-            for (var i = 0; i < totalKeys; i++) {
-                if (keys[i].includes("/20")) {
+            for (var keyIndex = 0; keyIndex < totalKeys; keyIndex++) {
+                if (keys[keyIndex].includes("/20")) {
 
                     //console.log(keys[i]);
-                    var dateKeyLength = keys[i].length;
-                    var dateKey = keys[i];
-                    xData[dataIndex] = keys[i].substr(0, dateKeyLength - 3);
+                    var dateKeyLength = keys[keyIndex].length;
+                    var dateKey = keys[keyIndex];
+                    xData[dataIndex] = keys[keyIndex].substr(0, dateKeyLength - 3);
                     yData[dataIndex] = jsonObj[dateKey];
                     if (dataIndex > 0)
                         yDelta[dataIndex] = yData[dataIndex] - yData[dataIndex - 1];
@@ -461,10 +422,10 @@
         }
 
         function getCovidLocation(lat, long_) {
-            for (var i = 0; i < covidLocations.length; i++) {
-                if (covidLocations[i].lat == lat &&
-                    covidLocations[i].long_ == long_)
-                    return covidLocations[i];
+            for (var location = 0; location < covidLocations.length; location++) {
+                if (covidLocations[location].lat == lat &&
+                    covidLocations[location].long_ == long_)
+                    return covidLocations[location];
             }
             return null;
 
@@ -482,13 +443,13 @@
                         var cols = arr.split('\n');
                         var headers = cols[0].split(',');
                         //console.log(headers);
-                        for (var i = 1; i < cols.length; i++) {
-                            var newCol = removeComaFromData(cols[i]);
+                        for (var colIndex = 1; colIndex < cols.length; colIndex++) {
+                            var newCol = removeComaFromData(cols[colIndex]);
                             var rows = newCol.split(',');
                             //console.log(rows);
                             var obj = {};
-                            for (var j = 0; j < rows.length; j++) {
-                                obj[trimAndReplace(headers[j])] = rows[j];
+                            for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+                                obj[trimAndReplace(headers[rowIndex])] = rows[rowIndex];
                             }
 
                             jsonObj.push(obj);
